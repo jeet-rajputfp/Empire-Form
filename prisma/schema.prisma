@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String
+  role          String    @default("admin") // admin | user
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workspaces    WorkspaceMember[]
+  forms         Form[]
+  responses     FormResponse[]
+}
+
+model Workspace {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  members     WorkspaceMember[]
+  forms       Form[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  role        String    @default("member") // owner | admin | member
+  userId      String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+model Form {
+  id              String    @id @default(uuid())
+  title           String
+  description     String?
+  slug            String    @unique
+  status          String    @default("draft") // draft | published | closed
+  fields          String    @default("[]") // JSON string of form fields
+  settings        String    @default("{}") // JSON string of form settings
+  version         Int       @default(1)
+  googleDocId     String?
+  googleFolderId  String?
+  createdById     String
+  workspaceId     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  createdBy       User      @relation(fields: [createdById], references: [id])
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  responses       FormResponse[]
+  versions        FormVersion[]
+}
+
+model FormVersion {
+  id        String   @id @default(uuid())
+  formId    String
+  version   Int
+  fields    String   // JSON snapshot of fields at this version
+  settings  String   // JSON snapshot of settings
+  createdAt DateTime @default(now())
+
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@unique([formId, version])
+}
+
+model FormResponse {
+  id            String    @id @default(uuid())
+  formId        String
+  respondentId  String?
+  answers       String    @default("{}") // JSON string of answers
+  files         String    @default("[]") // JSON string of file references
+  status        String    @default("in_progress") // in_progress | completed
+  submittedAt   DateTime?
+  completedAt   DateTime?
+  lastSavedAt   DateTime  @default(now())
+  metadata      String    @default("{}") // JSON: IP, user agent, etc.
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  form          Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  respondent    User?     @relation(fields: [respondentId], references: [id])
+  fileUploads   FileUpload[]
+}
+
+model FileUpload {
+  id          String    @id @default(uuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  path        String
+  responseId  String
+  fieldId     String
+  createdAt   DateTime  @default(now())
+
+  response    FormResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+}

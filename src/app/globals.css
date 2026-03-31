@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-gray-900 bg-gray-50;
+  }
+}
+
+@layer components {
+  .form-field-drag {
+    @apply transition-shadow duration-200;
+  }
+  .form-field-drag:hover {
+    @apply shadow-md;
+  }
+}
+
+/* Auto-save indicator animation */
+@keyframes pulse-save {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.auto-save-pulse {
+  animation: pulse-save 1.5s ease-in-out infinite;
+}

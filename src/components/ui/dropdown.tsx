@@ -9,6 +9,7 @@ interface DropdownItem {
   onClick: () => void
   icon?: React.ReactNode
   variant?: 'default' | 'danger'
+  separator?: boolean
 }
 
 interface DropdownProps {
@@ -36,19 +37,21 @@ export function Dropdown({ items, trigger }: DropdownProps) {
         {trigger || <MoreHorizontal size={18} className="text-gray-500" />}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px] z-50">
+        <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-200 py-1 min-w-[180px] z-50">
           {items.map((item, i) => (
-            <button
-              key={i}
-              onClick={() => { item.onClick(); setOpen(false) }}
-              className={cn(
-                'w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left',
-                item.variant === 'danger' ? 'text-red-600 hover:bg-red-50' : 'text-gray-700'
-              )}
-            >
-              {item.icon}
-              {item.label}
-            </button>
+            <div key={i}>
+              {item.separator && <div className="my-1 border-t border-gray-100" />}
+              <button
+                onClick={() => { item.onClick(); setOpen(false) }}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-gray-50 transition-colors text-left',
+                  item.variant === 'danger' ? 'text-red-500 hover:bg-red-50' : 'text-gray-700'
+                )}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            </div>
           ))}
         </div>
       )}

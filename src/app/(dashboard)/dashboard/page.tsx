@@ -9,8 +9,7 @@ import { Modal } from '@/components/ui/modal'
 import { Badge } from '@/components/ui/badge'
 import { Dropdown } from '@/components/ui/dropdown'
 import {
-  FileText, Plus, Search, FolderOpen, BarChart3,
-  ExternalLink, Copy, Pencil, Trash2, LogOut, Eye
+  FileText, Plus, Search, FolderOpen, LogOut
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
@@ -28,6 +27,8 @@ export default function DashboardPage() {
   const [showNewForm, setShowNewForm] = useState(false)
   const [showNewWorkspace, setShowNewWorkspace] = useState(false)
   const [showRenameWorkspace, setShowRenameWorkspace] = useState(false)
+  const [showRenameForm, setShowRenameForm] = useState<string | null>(null)
+  const [renameFormTitle, setRenameFormTitle] = useState('')
   const [newFormTitle, setNewFormTitle] = useState('')
   const [newWorkspaceName, setNewWorkspaceName] = useState('')
   const [renameWorkspaceName, setRenameWorkspaceName] = useState('')
@@ -118,6 +119,17 @@ export default function DashboardPage() {
   async function deleteForm(formId: string) {
     if (!confirm('Delete this form and all its responses?')) return
     await fetch(`/api/forms/${formId}`, { method: 'DELETE' })
+    fetchForms()
+  }
+
+  async function renameForm() {
+    if (!showRenameForm || !renameFormTitle) return
+    await fetch(`/api/forms/${showRenameForm}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: renameFormTitle }),
+    })
+    setShowRenameForm(null)
     fetchForms()
   }
 
@@ -354,38 +366,33 @@ export default function DashboardPage() {
                     items={[
                       {
                         label: 'Edit',
-                        icon: <Pencil size={14} />,
                         onClick: () => router.push(`/forms/${form.id}/edit`),
                       },
                       {
-                        label: 'View Responses',
-                        icon: <BarChart3 size={14} />,
-                        onClick: () => router.push(`/forms/${form.id}/responses`),
+                        label: 'Copy link',
+                        onClick: () => copyShareUrl(form.slug),
                       },
-                      ...(form.status === 'published'
-                        ? [
-                            {
-                              label: 'Open Form',
-                              icon: <ExternalLink size={14} />,
-                              onClick: () => window.open(`/f/${form.slug}`, '_blank'),
-                            },
-                            {
-                              label: 'Copy Link',
-                              icon: <Copy size={14} />,
-                              onClick: () => copyShareUrl(form.slug),
-                            },
-                          ]
-                        : []),
+                      {
+                        label: 'Results',
+                        onClick: () => router.push(`/forms/${form.id}/responses`),
+                        separator: true,
+                      },
+                      {
+                        label: 'Rename',
+                        onClick: () => {
+                          setRenameFormTitle(form.title)
+                          setShowRenameForm(form.id)
+                        },
+                      },
                       {
                         label: 'Duplicate',
-                        icon: <Copy size={14} />,
                         onClick: () => duplicateForm(form),
                       },
                       {
                         label: 'Delete',
-                        icon: <Trash2 size={14} />,
                         onClick: () => deleteForm(form.id),
                         variant: 'danger' as const,
+                        separator: true,
                       },
                     ]}
                   />
@@ -461,6 +468,31 @@ export default function DashboardPage() {
               Cancel
             </Button>
             <Button onClick={renameWorkspace} disabled={!renameWorkspaceName}>
+              Save
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Rename Form Modal */}
+      <Modal
+        isOpen={!!showRenameForm}
+        onClose={() => setShowRenameForm(null)}
+        title="Rename Form"
+      >
+        <div className="space-y-4">
+          <Input
+            label="Form Title"
+            value={renameFormTitle}
+            onChange={(e) => setRenameFormTitle(e.target.value)}
+            placeholder="Form title"
+            autoFocus
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setShowRenameForm(null)}>
+              Cancel
+            </Button>
+            <Button onClick={renameForm} disabled={!renameFormTitle}>
               Save
             </Button>
           </div>

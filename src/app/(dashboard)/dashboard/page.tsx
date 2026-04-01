@@ -27,8 +27,10 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showNewForm, setShowNewForm] = useState(false)
   const [showNewWorkspace, setShowNewWorkspace] = useState(false)
+  const [showRenameWorkspace, setShowRenameWorkspace] = useState(false)
   const [newFormTitle, setNewFormTitle] = useState('')
   const [newWorkspaceName, setNewWorkspaceName] = useState('')
+  const [renameWorkspaceName, setRenameWorkspaceName] = useState('')
   const [creating, setCreating] = useState(false)
 
   useEffect(() => {
@@ -151,6 +153,33 @@ export default function DashboardPage() {
     router.refresh()
   }
 
+  async function renameWorkspace() {
+    if (!renameWorkspaceName || !activeWorkspace) return
+    const res = await fetch(`/api/workspaces/${activeWorkspace}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: renameWorkspaceName }),
+    })
+    if (res.ok) {
+      setShowRenameWorkspace(false)
+      fetchWorkspaces()
+    }
+  }
+
+  async function deleteWorkspace() {
+    if (!activeWorkspace) return
+    if (!confirm('Delete this workspace and all its forms? This cannot be undone.')) return
+    const res = await fetch(`/api/workspaces/${activeWorkspace}`, { method: 'DELETE' })
+    if (res.ok) {
+      setActiveWorkspace(null)
+      fetchWorkspaces()
+      fetchForms()
+    } else {
+      const err = await res.json().catch(() => ({}))
+      alert(err.error || 'Failed to delete workspace')
+    }
+  }
+
   const filteredForms = forms.filter((f) =>
     f.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -245,10 +274,28 @@ export default function DashboardPage() {
       <div className="flex-1 min-w-0">
         <div className="max-w-5xl mx-auto px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <div>
+            <div className="flex items-center gap-3">
               <h1 className="text-xl font-semibold text-gray-900">
                 {activeWorkspaceData?.name || 'All Forms'}
               </h1>
+              {activeWorkspaceData && (
+                <Dropdown
+                  items={[
+                    {
+                      label: 'Rename',
+                      onClick: () => {
+                        setRenameWorkspaceName(activeWorkspaceData.name)
+                        setShowRenameWorkspace(true)
+                      },
+                    },
+                    {
+                      label: 'Delete',
+                      onClick: deleteWorkspace,
+                      variant: 'danger' as const,
+                    },
+                  ]}
+                />
+              )}
             </div>
             <Button onClick={() => setShowNewForm(true)}>
               <Plus size={16} className="mr-1.5" />
@@ -390,6 +437,31 @@ export default function DashboardPage() {
             </Button>
             <Button onClick={createWorkspace} loading={creating} disabled={!newWorkspaceName}>
               Create
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Rename Workspace Modal */}
+      <Modal
+        isOpen={showRenameWorkspace}
+        onClose={() => setShowRenameWorkspace(false)}
+        title="Rename Workspace"
+      >
+        <div className="space-y-4">
+          <Input
+            label="Workspace Name"
+            value={renameWorkspaceName}
+            onChange={(e) => setRenameWorkspaceName(e.target.value)}
+            placeholder="Workspace name"
+            autoFocus
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setShowRenameWorkspace(false)}>
+              Cancel
+            </Button>
+            <Button onClick={renameWorkspace} disabled={!renameWorkspaceName}>
+              Save
             </Button>
           </div>
         </div>

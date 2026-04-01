@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FormField, FormSettings, FieldType } from '@/types'
+import { FormField, FormSettings, FormDesign, DEFAULT_FORM_DESIGN, FieldType } from '@/types'
 import {
   Type, AlignLeft, Calendar, Hash, CheckSquare,
   ChevronDown, Upload, Mail, Phone, Star,
@@ -197,21 +197,10 @@ export function QuestionSettings({ field, settings, onUpdateField, onUpdateSetti
         )}
 
         {activePanel === 'design' && (
-          <div className="p-4 space-y-4">
-            <p className="text-sm text-gray-500">Theme and design options.</p>
-            <div>
-              <label className="text-sm font-medium text-gray-900 block mb-2">Theme</label>
-              <select
-                value={settings.theme}
-                onChange={(e) => onUpdateSettings({ ...settings, theme: e.target.value as any })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
-              >
-                <option value="default">Default</option>
-                <option value="minimal">Minimal</option>
-                <option value="modern">Modern</option>
-              </select>
-            </div>
-          </div>
+          <DesignPanel
+            design={settings.design || DEFAULT_FORM_DESIGN}
+            onUpdate={(design) => onUpdateSettings({ ...settings, design })}
+          />
         )}
 
         {activePanel === 'settings' && (
@@ -319,6 +308,131 @@ function ToggleWithInput({
           className="mt-2 w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-gray-400 focus:outline-none"
         />
       )}
+    </div>
+  )
+}
+
+function DesignPanel({ design, onUpdate }: { design: FormDesign; onUpdate: (d: FormDesign) => void }) {
+  const fonts = ['Roboto', 'Inter', 'Open Sans', 'Lato', 'Montserrat', 'Poppins', 'Playfair Display', 'Source Sans Pro']
+
+  return (
+    <div className="p-4 space-y-5">
+      {/* Font selector */}
+      <div>
+        <select
+          value={design.font}
+          onChange={(e) => onUpdate({ ...design, font: e.target.value })}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-gray-400 focus:outline-none"
+        >
+          {fonts.map((f) => (
+            <option key={f} value={f}>{f}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Color rows */}
+      <ColorRow label="Questions" value={design.questionsColor} onChange={(v) => onUpdate({ ...design, questionsColor: v })} />
+      <ColorRow label="Answers" value={design.answersColor} onChange={(v) => onUpdate({ ...design, answersColor: v })} />
+      <ColorRow label="Buttons" value={design.buttonsColor} onChange={(v) => onUpdate({ ...design, buttonsColor: v })} />
+      <ColorRow label="Button text" value={design.buttonTextColor} onChange={(v) => onUpdate({ ...design, buttonTextColor: v })} />
+      <ColorRow label="Background" value={design.backgroundColor} onChange={(v) => onUpdate({ ...design, backgroundColor: v })} />
+
+      {/* Background image */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-700">Background image</span>
+        <button className="text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-md transition-colors">
+          Add
+        </button>
+      </div>
+
+      {/* Logo */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-700">Logo</span>
+          {design.logo && (
+            <span className="w-5 h-5 bg-gray-200 rounded-full" />
+          )}
+        </div>
+        <button className="text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-md transition-colors">
+          Add
+        </button>
+      </div>
+
+      <div className="border-t border-gray-100 pt-4 space-y-4">
+        {/* Welcome/Thank you font size */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-700">Welcome/Thankyou Font size</span>
+          <select
+            value={design.welcomeFontSize}
+            onChange={(e) => onUpdate({ ...design, welcomeFontSize: parseInt(e.target.value) })}
+            className="w-20 border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:border-gray-400 focus:outline-none text-center"
+          >
+            {[18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 48].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Questions font size */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-700">Questions Font size</span>
+          <select
+            value={design.questionsFontSize}
+            onChange={(e) => onUpdate({ ...design, questionsFontSize: parseInt(e.target.value) })}
+            className="w-20 border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:border-gray-400 focus:outline-none text-center"
+          >
+            {[14, 16, 18, 20, 22, 24, 26, 28, 30, 32].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Alignment */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-700">Alignment</span>
+          <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              onClick={() => onUpdate({ ...design, alignment: 'left' })}
+              className={`px-3 py-1.5 text-sm transition-colors ${
+                design.alignment === 'left' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="1.5" rx="0.5"/><rect x="2" y="7" width="8" height="1.5" rx="0.5"/><rect x="2" y="11" width="10" height="1.5" rx="0.5"/></svg>
+            </button>
+            <button
+              onClick={() => onUpdate({ ...design, alignment: 'center' })}
+              className={`px-3 py-1.5 text-sm border-l border-gray-200 transition-colors ${
+                design.alignment === 'center' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="1.5" rx="0.5"/><rect x="4" y="7" width="8" height="1.5" rx="0.5"/><rect x="3" y="11" width="10" height="1.5" rx="0.5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-gray-700">{label}</span>
+      <div className="relative">
+        <label className="flex items-center gap-1.5 cursor-pointer border border-gray-200 rounded-lg px-2 py-1.5 hover:border-gray-300 transition-colors">
+          <span
+            className="w-6 h-6 rounded border border-gray-200"
+            style={{ backgroundColor: value }}
+          />
+          <ChevronDown size={12} className="text-gray-400" />
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
+        </label>
+      </div>
     </div>
   )
 }

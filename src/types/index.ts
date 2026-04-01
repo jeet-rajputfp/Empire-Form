@@ -36,6 +36,34 @@ export interface FormField {
   order: number
 }
 
+export interface FormDesign {
+  font: string
+  questionsColor: string
+  answersColor: string
+  buttonsColor: string
+  buttonTextColor: string
+  backgroundColor: string
+  backgroundImage: string
+  logo: string
+  welcomeFontSize: number
+  questionsFontSize: number
+  alignment: 'left' | 'center'
+}
+
+export const DEFAULT_FORM_DESIGN: FormDesign = {
+  font: 'Roboto',
+  questionsColor: '#3D3D3D',
+  answersColor: '#4F4F4F',
+  buttonsColor: '#0445AF',
+  buttonTextColor: '#FFFFFF',
+  backgroundColor: '#FFFFFF',
+  backgroundImage: '',
+  logo: '',
+  welcomeFontSize: 30,
+  questionsFontSize: 24,
+  alignment: 'left',
+}
+
 export interface FormSettings {
   submitButtonText: string
   successMessage: string
@@ -46,6 +74,7 @@ export interface FormSettings {
   autoSaveInterval: number // ms
   theme: 'default' | 'minimal' | 'modern'
   googleDocSync: boolean
+  design: FormDesign
 }
 
 export const DEFAULT_FORM_SETTINGS: FormSettings = {
@@ -58,6 +87,7 @@ export const DEFAULT_FORM_SETTINGS: FormSettings = {
   autoSaveInterval: 3000,
   theme: 'default',
   googleDocSync: false,
+  design: DEFAULT_FORM_DESIGN,
 }
 
 export interface FormData {

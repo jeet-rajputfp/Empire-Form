@@ -14,6 +14,7 @@ export type FieldType =
   | 'rating'
   | 'heading'
   | 'paragraph'
+  | 'website'
 
 export interface FormField {
   id: string

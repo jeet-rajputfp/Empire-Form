@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) {
         router.push('/auth/signin')
         return

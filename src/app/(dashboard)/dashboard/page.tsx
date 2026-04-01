@@ -316,13 +316,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Forms table */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="grid grid-cols-[1fr,120px,100px,130px,130px] gap-4 px-5 py-3 border-b border-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="bg-white rounded-xl border border-gray-200">
+            <div className="grid grid-cols-[1fr,120px,100px,130px,130px,40px] gap-4 px-5 py-3 border-b border-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
               <span>Forms</span>
               <span>Status</span>
               <span>Responses</span>
               <span>Last Updated</span>
               <span>Date Created</span>
+              <span></span>
             </div>
 
             {filteredForms.length === 0 ? (
@@ -334,7 +335,7 @@ export default function DashboardPage() {
               filteredForms.map((form) => (
                 <div
                   key={form.id}
-                  className="relative group grid grid-cols-[1fr,120px,100px,130px,130px] gap-4 px-5 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors items-center"
+                  className="grid grid-cols-[1fr,120px,100px,130px,130px,40px] gap-4 px-5 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors items-center"
                 >
                   <Link
                     href={`/forms/${form.id}/edit`}
@@ -361,7 +362,6 @@ export default function DashboardPage() {
                   <span className="text-sm text-gray-600">{form._count?.responses || 0}</span>
                   <span className="text-sm text-gray-500">{formatDate(form.updatedAt)}</span>
                   <span className="text-sm text-gray-500">{formatDate(form.createdAt)}</span>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Dropdown
                     items={[
                       {
@@ -396,7 +396,6 @@ export default function DashboardPage() {
                       },
                     ]}
                   />
-                  </div>
                 </div>
               ))
             )}

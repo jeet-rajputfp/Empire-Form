@@ -38,6 +38,8 @@ export default function DashboardPage() {
         return
       }
       setUser(user)
+      // Ensure user profile is synced to app DB
+      await fetch('/api/auth/sync', { method: 'POST' })
       setLoading(false)
       fetchWorkspaces()
       fetchForms()
@@ -80,6 +82,9 @@ export default function DashboardPage() {
       setShowNewForm(false)
       setNewFormTitle('')
       router.push(`/forms/${form.id}/edit`)
+    } else {
+      const err = await res.json().catch(() => ({}))
+      alert(err.error || 'Failed to create form. Please try again.')
     }
     setCreating(false)
   }

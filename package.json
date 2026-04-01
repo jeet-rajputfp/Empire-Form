@@ -31,7 +31,7 @@
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.27",
-    "bcryptjs": "^3.0.3",
+    "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "google-auth-library": "^10.6.2",

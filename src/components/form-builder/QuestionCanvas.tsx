@@ -1,6 +1,6 @@
 'use client'
 
-import { FormField } from '@/types'
+import { FormField, FormDesign, DEFAULT_FORM_DESIGN } from '@/types'
 import { Star } from 'lucide-react'
 
 interface QuestionCanvasProps {
@@ -8,9 +8,11 @@ interface QuestionCanvasProps {
   fieldIndex: number
   totalFields: number
   onUpdate: (field: FormField) => void
+  design?: FormDesign
 }
 
-export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate }: QuestionCanvasProps) {
+export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, design }: QuestionCanvasProps) {
+  const d = design || DEFAULT_FORM_DESIGN
   if (!field) {
     return (
       <div className="flex-1 bg-gray-100 flex items-center justify-center">
@@ -28,6 +30,12 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate }: Que
     <div className="flex-1 bg-gray-100 overflow-y-auto">
       <div className="max-w-2xl mx-auto py-16 px-8">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[480px] p-12 flex flex-col justify-center">
+          {/* Logo */}
+          {d.logo && (
+            <div className="flex justify-center mb-8 -mt-2">
+              <img src={d.logo} alt="Logo" className="max-h-16 object-contain" />
+            </div>
+          )}
           {isLayout ? (
             /* Welcome / Thank You screen */
             <div className="text-center">

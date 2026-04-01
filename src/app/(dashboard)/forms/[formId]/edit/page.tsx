@@ -281,6 +281,7 @@ export default function FormEditorPage() {
             fieldIndex={selectedFieldIndex}
             totalFields={fields.length}
             onUpdate={(updated) => selectedField && updateField(selectedField.id, updated)}
+            design={settings.design}
           />
 
           {/* Right sidebar - Question settings */}

@@ -346,16 +346,38 @@ function DesignPanel({ design, onUpdate }: { design: FormDesign; onUpdate: (d: F
       </div>
 
       {/* Logo */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div>
+        <div className="flex items-center justify-between">
           <span className="text-sm text-gray-700">Logo</span>
-          {design.logo && (
-            <span className="w-5 h-5 bg-gray-200 rounded-full" />
-          )}
+          <label className="text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-md transition-colors cursor-pointer">
+            {design.logo ? 'Change' : 'Add'}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = (ev) => {
+                  onUpdate({ ...design, logo: ev.target?.result as string })
+                }
+                reader.readAsDataURL(file)
+              }}
+            />
+          </label>
         </div>
-        <button className="text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-md transition-colors">
-          Add
-        </button>
+        {design.logo && (
+          <div className="mt-2 flex items-center gap-2">
+            <img src={design.logo} alt="Logo" className="h-10 object-contain rounded" />
+            <button
+              onClick={() => onUpdate({ ...design, logo: '' })}
+              className="text-xs text-red-500 hover:text-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="border-t border-gray-100 pt-4 space-y-4">

@@ -228,6 +228,13 @@ export function FormRenderer({ formId, title, description, fields, settings }: F
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* Logo */}
+      {settings.design?.logo && (
+        <div className="flex justify-center mb-6">
+          <img src={settings.design.logo} alt="Logo" className="max-h-16 object-contain" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>

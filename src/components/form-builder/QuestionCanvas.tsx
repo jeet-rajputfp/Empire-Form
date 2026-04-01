@@ -29,13 +29,14 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
   return (
     <div className="flex-1 bg-gray-100 overflow-y-auto">
       <div className="max-w-2xl mx-auto py-16 px-8">
-        {/* Logo - top center above card */}
-        {d.logo && (
-          <div className="flex justify-center mb-6">
-            <img src={d.logo} alt="Logo" className="max-h-12 object-contain" />
-          </div>
-        )}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[480px] p-12 flex flex-col justify-center">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[480px] p-12 flex flex-col">
+          {/* Logo - top center inside card */}
+          {d.logo && (
+            <div className="flex justify-center mb-8">
+              <img src={d.logo} alt="Logo" className="max-h-12 object-contain" />
+            </div>
+          )}
+          <div className="flex-1 flex flex-col justify-center">
           {isLayout ? (
             /* Welcome / Thank You screen */
             <div className="text-center">
@@ -82,6 +83,7 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

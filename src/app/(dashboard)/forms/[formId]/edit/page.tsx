@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { FormField, FieldType, FormSettings, DEFAULT_FORM_SETTINGS } from '@/types'
 import { FieldPalette } from '@/components/form-builder/FieldPalette'
 import { FieldEditor } from '@/components/form-builder/FieldEditor'
@@ -15,7 +14,6 @@ import Link from 'next/link'
 export default function FormEditorPage() {
   const params = useParams()
   const router = useRouter()
-  const { data: session } = useSession()
   const formId = params.formId as string
 
   const [title, setTitle] = useState('')

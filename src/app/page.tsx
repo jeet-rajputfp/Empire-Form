@@ -1,19 +1,21 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { FileText, Zap, Shield, BarChart3 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HomePage() {
-  const { data: session } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (session) router.push('/dashboard')
-  }, [session, router])
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.push('/dashboard')
+    })
+  }, [router])
 
   return (
     <div className="min-h-screen bg-white">

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
@@ -16,9 +16,11 @@ import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession()
   const router = useRouter()
+  const supabase = createClient()
 
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [workspaces, setWorkspaces] = useState<any[]>([])
   const [forms, setForms] = useState<any[]>([])
   const [activeWorkspace, setActiveWorkspace] = useState<string | null>(null)
@@ -30,21 +32,26 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false)
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/auth/signin')
-  }, [status, router])
-
-  useEffect(() => {
-    if (status !== 'authenticated') return
-    fetchWorkspaces()
-    fetchForms()
-  }, [status])
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.push('/auth/signin')
+        return
+      }
+      setUser(user)
+      setLoading(false)
+      fetchWorkspaces()
+      fetchForms()
+    })
+  }, [])
 
   async function fetchWorkspaces() {
     const res = await fetch('/api/workspaces')
-    const data = await res.json()
-    setWorkspaces(data)
-    if (data.length > 0 && !activeWorkspace) {
-      setActiveWorkspace(data[0].id)
+    if (res.ok) {
+      const data = await res.json()
+      setWorkspaces(data)
+      if (data.length > 0 && !activeWorkspace) {
+        setActiveWorkspace(data[0].id)
+      }
     }
   }
 
@@ -53,12 +60,12 @@ export default function DashboardPage() {
       ? `/api/forms?workspaceId=${activeWorkspace}`
       : '/api/forms'
     const res = await fetch(url)
-    setForms(await res.json())
+    if (res.ok) setForms(await res.json())
   }
 
   useEffect(() => {
-    if (status === 'authenticated') fetchForms()
-  }, [activeWorkspace, status])
+    if (!loading) fetchForms()
+  }, [activeWorkspace])
 
   async function createForm() {
     if (!newFormTitle || !activeWorkspace) return
@@ -107,7 +114,6 @@ export default function DashboardPage() {
     })
     if (res.ok) {
       const newForm = await res.json()
-      // Copy fields and settings
       await fetch(`/api/forms/${newForm.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -125,13 +131,20 @@ export default function DashboardPage() {
     navigator.clipboard.writeText(url)
   }
 
+  async function handleSignOut() {
+    await fetch('/api/auth/signout', { method: 'POST' })
+    await supabase.auth.signOut()
+    router.push('/auth/signin')
+    router.refresh()
+  }
+
   const filteredForms = forms.filter((f) =>
     f.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const activeWorkspaceData = workspaces.find((w) => w.id === activeWorkspace)
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-2 border-gray-900 border-t-transparent rounded-full" />
@@ -200,13 +213,15 @@ export default function DashboardPage() {
         <div className="p-3 border-t border-gray-100">
           <div className="flex items-center gap-2 px-2">
             <div className="w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
-              {session?.user?.name?.[0] || 'U'}
+              {user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-gray-900 truncate">{session?.user?.name}</p>
-              <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+              <p className="text-xs font-medium text-gray-900 truncate">
+                {user?.user_metadata?.name || 'User'}
+              </p>
+              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>
-            <button onClick={() => signOut()} className="text-gray-400 hover:text-gray-600">
+            <button onClick={handleSignOut} className="text-gray-400 hover:text-gray-600">
               <LogOut size={14} />
             </button>
           </div>

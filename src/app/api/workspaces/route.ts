@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) {
+  const user = await getAuthUser()
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const workspaces = await prisma.workspace.findMany({
     where: {
-      members: { some: { userId: (session.user as any).id } },
+      members: { some: { userId: user.id } },
     },
     include: {
       _count: { select: { forms: true } },
@@ -23,8 +22,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) {
+  const user = await getAuthUser()
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -40,7 +39,7 @@ export async function POST(req: Request) {
       name,
       slug,
       members: {
-        create: { userId: (session.user as any).id, role: 'owner' },
+        create: { userId: user.id, role: 'owner' },
       },
     },
   })

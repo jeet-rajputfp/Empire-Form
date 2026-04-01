@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FileText } from 'lucide-react'
@@ -20,31 +20,52 @@ export default function SignInPage() {
     setLoading(true)
     setError('')
 
+    const supabase = createClient()
+
     if (isSignUp) {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: { name: form.name },
+        },
       })
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Registration failed')
+
+      if (signUpError) {
+        setError(signUpError.message)
         setLoading(false)
         return
       }
-    }
 
-    const result = await signIn('credentials', {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    })
+      // After sign up, ensure user profile exists
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await fetch('/api/auth/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: form.name }),
+        })
+      }
 
-    if (result?.error) {
-      setError('Invalid email or password')
-      setLoading(false)
-    } else {
       router.push('/dashboard')
+      router.refresh()
+    } else {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      })
+
+      if (signInError) {
+        setError(signInError.message)
+        setLoading(false)
+        return
+      }
+
+      // Ensure user profile exists
+      await fetch('/api/auth/sync', { method: 'POST' })
+
+      router.push('/dashboard')
+      router.refresh()
     }
   }
 
@@ -92,6 +113,7 @@ export default function SignInPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="••••••••"
               required
+              helperText={isSignUp ? 'Minimum 6 characters' : undefined}
             />
             {error && (
               <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
@@ -110,10 +132,6 @@ export default function SignInPage() {
             </button>
           </div>
         </div>
-
-        <p className="mt-4 text-center text-xs text-gray-500">
-          Demo: admin@empireform.com / admin123
-        </p>
       </div>
     </div>
   )

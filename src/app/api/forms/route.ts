@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateSlug } from '@/lib/utils'
 import { DEFAULT_FORM_SETTINGS } from '@/types'
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) {
+  const user = await getAuthUser()
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -17,7 +16,7 @@ export async function GET(req: Request) {
   const forms = await prisma.form.findMany({
     where: {
       workspace: {
-        members: { some: { userId: (session.user as any).id } },
+        members: { some: { userId: user.id } },
       },
       ...(workspaceId ? { workspaceId } : {}),
     },
@@ -32,8 +31,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) {
+  const user = await getAuthUser()
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -44,7 +43,7 @@ export async function POST(req: Request) {
 
   // Verify membership
   const membership = await prisma.workspaceMember.findFirst({
-    where: { userId: (session.user as any).id, workspaceId },
+    where: { userId: user.id, workspaceId },
   })
   if (!membership) {
     return NextResponse.json({ error: 'Not a member of this workspace' }, { status: 403 })
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
       slug: generateSlug(title),
       fields: JSON.stringify([]),
       settings: JSON.stringify(DEFAULT_FORM_SETTINGS),
-      createdById: (session.user as any).id,
+      createdById: user.id,
       workspaceId,
     },
   })

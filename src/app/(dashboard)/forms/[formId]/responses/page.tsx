@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -14,7 +13,6 @@ import { formatDate } from '@/lib/utils'
 
 export default function ResponsesPage() {
   const params = useParams()
-  const { data: session } = useSession()
   const formId = params.formId as string
 
   const [form, setForm] = useState<any>(null)

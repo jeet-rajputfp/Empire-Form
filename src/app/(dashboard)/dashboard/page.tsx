@@ -70,21 +70,29 @@ export default function DashboardPage() {
   }, [activeWorkspace])
 
   async function createForm() {
-    if (!newFormTitle || !activeWorkspace) return
+    if (!newFormTitle) return
+    if (!activeWorkspace) {
+      alert('No workspace found. Please refresh the page.')
+      return
+    }
     setCreating(true)
-    const res = await fetch('/api/forms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newFormTitle, workspaceId: activeWorkspace }),
-    })
-    if (res.ok) {
-      const form = await res.json()
-      setShowNewForm(false)
-      setNewFormTitle('')
-      router.push(`/forms/${form.id}/edit`)
-    } else {
-      const err = await res.json().catch(() => ({}))
-      alert(err.error || 'Failed to create form. Please try again.')
+    try {
+      const res = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newFormTitle, workspaceId: activeWorkspace }),
+      })
+      if (res.ok) {
+        const form = await res.json()
+        setShowNewForm(false)
+        setNewFormTitle('')
+        router.push(`/forms/${form.id}/edit`)
+      } else {
+        const err = await res.json().catch(() => ({}))
+        alert(err.error || `Failed to create form (${res.status})`)
+      }
+    } catch (e: any) {
+      alert('Network error: ' + e.message)
     }
     setCreating(false)
   }

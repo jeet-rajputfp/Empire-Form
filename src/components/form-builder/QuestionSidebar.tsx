@@ -67,8 +67,9 @@ export function QuestionSidebar({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  const endings = fields.filter((f) => f.type === 'heading' || f.type === 'paragraph')
+  const welcomeScreens = fields.filter((f) => f.type === 'heading')
   const questions = fields.filter((f) => f.type !== 'heading' && f.type !== 'paragraph')
+  const endings = fields.filter((f) => f.type === 'paragraph')
 
   return (
     <div className="w-48 border-r border-gray-200 flex flex-col bg-gray-50/50 flex-shrink-0">
@@ -114,7 +115,32 @@ export function QuestionSidebar({
         </div>
       </div>
 
-      {/* Questions list */}
+      {/* Welcome Screens - at the top */}
+      {welcomeScreens.length > 0 && (
+        <div className="px-2 pb-1 space-y-1">
+          {welcomeScreens.map((field) => {
+            const config = getFieldConfig(field.type)
+            const isSelected = field.id === selectedFieldId
+            return (
+              <button
+                key={field.id}
+                onClick={() => onSelectField(field.id)}
+                className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition-colors ${
+                  isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-100 border border-transparent'
+                }`}
+              >
+                <span className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white flex-shrink-0`}>
+                  {config.icon}
+                </span>
+                <span className="text-xs text-gray-600 truncate">Welcome</span>
+              </button>
+            )
+          })}
+          <div className="border-b border-gray-200 mx-1" />
+        </div>
+      )}
+
+      {/* Questions list - in the middle */}
       <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-1">
         {questions.map((field, idx) => {
           const config = getFieldConfig(field.type)
@@ -140,11 +166,19 @@ export function QuestionSidebar({
         })}
       </div>
 
-      {/* Endings section */}
-      {endings.length > 0 && (
-        <div className="border-t border-gray-200 px-3 py-2">
-          <span className="text-xs font-semibold text-gray-900 uppercase tracking-wide">Endings</span>
-          <div className="mt-1 space-y-1">
+      {/* Endings (Thank You Screens) - at the bottom */}
+      <div className="border-t border-gray-200 px-3 py-2">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Endings</span>
+          <button
+            onClick={() => onAddField('paragraph')}
+            className="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 hover:bg-gray-200"
+          >
+            <Plus size={12} />
+          </button>
+        </div>
+        {endings.length > 0 && (
+          <div className="space-y-1">
             {endings.map((field) => {
               const config = getFieldConfig(field.type)
               const isSelected = field.id === selectedFieldId
@@ -159,25 +193,12 @@ export function QuestionSidebar({
                   <span className={`w-5 h-5 ${config.color} rounded flex items-center justify-center text-white flex-shrink-0`}>
                     {config.icon}
                   </span>
-                  <span className="text-xs text-gray-600 truncate">{config.label}</span>
+                  <span className="text-xs text-gray-600 truncate">Thank You</span>
                 </button>
               )
             })}
           </div>
-        </div>
-      )}
-
-      {/* Add endings */}
-      <div className="border-t border-gray-200 px-3 py-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Endings</span>
-          <button
-            onClick={() => onAddField('paragraph')}
-            className="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-gray-600 hover:bg-gray-200"
-          >
-            <Plus size={12} />
-          </button>
-        </div>
+        )}
       </div>
     </div>
   )

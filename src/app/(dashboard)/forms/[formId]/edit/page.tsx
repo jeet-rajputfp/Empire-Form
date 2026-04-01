@@ -100,7 +100,14 @@ export default function FormEditorPage() {
         ? ['Option 1', 'Option 2', 'Option 3']
         : undefined,
     }
-    const newFields = [...fields, newField]
+    let newFields: FormField[]
+    if (type === 'heading') {
+      // Welcome Screen goes to the start
+      newFields = [newField, ...fields]
+    } else {
+      // Everything else appends at the end (Thank You screens naturally end up last)
+      newFields = [...fields, newField]
+    }
     setFields(newFields)
     setSelectedFieldId(newField.id)
   }

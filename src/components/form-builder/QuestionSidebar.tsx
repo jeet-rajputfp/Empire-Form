@@ -43,6 +43,7 @@ interface QuestionSidebarProps {
   onDeleteField: (id: string) => void
   onMoveField: (id: string, direction: 'up' | 'down') => void
   onDuplicateField: (id: string) => void
+  onReorderFields: (reordered: FormField[]) => void
 }
 
 export function QuestionSidebar({
@@ -53,8 +54,11 @@ export function QuestionSidebar({
   onDeleteField,
   onMoveField,
   onDuplicateField,
+  onReorderFields,
 }: QuestionSidebarProps) {
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -66,6 +70,32 @@ export function QuestionSidebar({
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  function handleDragStart(fieldId: string) {
+    setDragId(fieldId)
+  }
+
+  function handleDragOver(e: React.DragEvent, fieldId: string) {
+    e.preventDefault()
+    setDragOverId(fieldId)
+  }
+
+  function handleDrop(targetId: string) {
+    if (!dragId || dragId === targetId) {
+      setDragId(null)
+      setDragOverId(null)
+      return
+    }
+    const allFields = [...fields]
+    const fromIdx = allFields.findIndex((f) => f.id === dragId)
+    const toIdx = allFields.findIndex((f) => f.id === targetId)
+    if (fromIdx === -1 || toIdx === -1) return
+    const [moved] = allFields.splice(fromIdx, 1)
+    allFields.splice(toIdx, 0, moved)
+    onReorderFields(allFields)
+    setDragId(null)
+    setDragOverId(null)
+  }
 
   const welcomeScreens = fields.filter((f) => f.type === 'heading')
   const questions = fields.filter((f) => f.type !== 'heading' && f.type !== 'paragraph')
@@ -152,16 +182,25 @@ export function QuestionSidebar({
         {questions.map((field, idx) => {
           const config = getFieldConfig(field.type)
           const isSelected = field.id === selectedFieldId
+          const isDragOver = dragOverId === field.id && dragId !== field.id
           return (
-            <button
+            <div
               key={field.id}
+              draggable
+              onDragStart={() => handleDragStart(field.id)}
+              onDragOver={(e) => handleDragOver(e, field.id)}
+              onDragEnd={() => { setDragId(null); setDragOverId(null) }}
+              onDrop={() => handleDrop(field.id)}
               onClick={() => onSelectField(field.id)}
-              className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition-colors group ${
-                isSelected
+              className={`w-full flex items-center gap-1.5 px-1.5 py-2 rounded-lg text-left transition-colors group cursor-grab active:cursor-grabbing ${
+                isDragOver
+                  ? 'border-t-2 border-blue-400'
+                  : isSelected
                   ? 'bg-blue-50 border border-blue-200'
                   : 'hover:bg-gray-100 border border-transparent'
               }`}
             >
+              <GripVertical size={12} className="text-gray-300 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
               <span className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white flex-shrink-0 text-xs`}>
                 {config.icon}
               </span>
@@ -175,7 +214,7 @@ export function QuestionSidebar({
               >
                 <X size={12} />
               </span>
-            </button>
+            </div>
           )
         })}
       </div>

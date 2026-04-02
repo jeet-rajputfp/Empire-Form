@@ -247,6 +247,7 @@ export default function FormEditorPage() {
             onDeleteField={deleteField}
             onMoveField={moveField}
             onDuplicateField={duplicateField}
+            onReorderFields={setFields}
           />
 
           {/* Center canvas */}

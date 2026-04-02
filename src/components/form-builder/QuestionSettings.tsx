@@ -188,11 +188,23 @@ export function QuestionSettings({ field, settings, onUpdateField, onUpdateSetti
         )}
 
         {activePanel === 'question' && isLayout && (
-          <div className="p-4">
+          <div className="p-4 space-y-5">
             <p className="text-sm text-gray-500">
               {field.type === 'heading' ? 'Welcome screen' : 'Thank you screen'} settings.
               Edit the content directly in the preview.
             </p>
+            {field.type === 'paragraph' && (
+              <div>
+                <label className="text-sm font-medium text-gray-900 block mb-2">Submit button text</label>
+                <input
+                  type="text"
+                  value={settings.submitButtonText}
+                  onChange={(e) => onUpdateSettings({ ...settings, submitButtonText: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  placeholder="Submit"
+                />
+              </div>
+            )}
           </div>
         )}
 

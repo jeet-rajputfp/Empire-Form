@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { FormField, FieldType } from '@/types'
-import { Plus, GripVertical, Copy, Trash2, ChevronDown } from 'lucide-react'
+import { Plus, GripVertical, Copy, Trash2, ChevronDown, X } from 'lucide-react'
 import {
   Type, AlignLeft, Calendar, Hash, CheckSquare,
   ChevronDown as DropdownIcon, Image, Upload, Mail,
@@ -125,14 +125,21 @@ export function QuestionSidebar({
               <button
                 key={field.id}
                 onClick={() => onSelectField(field.id)}
-                className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition-colors group ${
                   isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-100 border border-transparent'
                 }`}
               >
                 <span className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white flex-shrink-0`}>
                   {config.icon}
                 </span>
-                <span className="text-xs text-gray-600 truncate">Welcome</span>
+                <span className="text-xs text-gray-600 truncate flex-1">Welcome</span>
+                <span
+                  role="button"
+                  onClick={(e) => { e.stopPropagation(); onDeleteField(field.id) }}
+                  className="hidden group-hover:flex w-5 h-5 items-center justify-center rounded text-red-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+                >
+                  <X size={12} />
+                </span>
               </button>
             )
           })}
@@ -161,6 +168,13 @@ export function QuestionSidebar({
               <span className="text-xs text-gray-700 truncate flex-1 font-medium">
                 {field.label || 'Untitled'}
               </span>
+              <span
+                role="button"
+                onClick={(e) => { e.stopPropagation(); onDeleteField(field.id) }}
+                className="hidden group-hover:flex w-5 h-5 items-center justify-center rounded text-red-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0 transition-colors"
+              >
+                <X size={12} />
+              </span>
             </button>
           )
         })}
@@ -186,14 +200,21 @@ export function QuestionSidebar({
                 <button
                   key={field.id}
                   onClick={() => onSelectField(field.id)}
-                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors group ${
                     isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-100 border border-transparent'
                   }`}
                 >
                   <span className={`w-5 h-5 ${config.color} rounded flex items-center justify-center text-white flex-shrink-0`}>
                     {config.icon}
                   </span>
-                  <span className="text-xs text-gray-600 truncate">Thank You</span>
+                  <span className="text-xs text-gray-600 truncate flex-1">Thank You</span>
+                  <span
+                    role="button"
+                    onClick={(e) => { e.stopPropagation(); onDeleteField(field.id) }}
+                    className="hidden group-hover:flex w-5 h-5 items-center justify-center rounded text-red-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+                  >
+                    <X size={12} />
+                  </span>
                 </button>
               )
             })}

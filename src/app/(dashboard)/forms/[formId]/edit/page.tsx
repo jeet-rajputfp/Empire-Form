@@ -6,6 +6,7 @@ import { FormField, FieldType, FormSettings, DEFAULT_FORM_SETTINGS } from '@/typ
 import { QuestionSidebar } from '@/components/form-builder/QuestionSidebar'
 import { QuestionCanvas } from '@/components/form-builder/QuestionCanvas'
 import { QuestionSettings } from '@/components/form-builder/QuestionSettings'
+import { ShareTab } from '@/components/form-builder/ShareTab'
 import { Button } from '@/components/ui/button'
 import { Eye, Share2, BarChart3, Link2 } from 'lucide-react'
 import { v4 as uuid } from 'uuid'
@@ -233,34 +234,7 @@ export default function FormEditorPage() {
 
       {/* Share Tab */}
       {activeTab === 'share' ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center max-w-md">
-            <Share2 size={40} className="mx-auto text-gray-300 mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Share your form</h2>
-            {status === 'published' ? (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-500">Your form is live and accepting responses.</p>
-                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-3">
-                  <Link2 size={16} className="text-gray-400 flex-shrink-0" />
-                  <code className="text-sm text-gray-700 flex-1 truncate">
-                    {typeof window !== 'undefined' ? window.location.origin : ''}/f/{slug}
-                  </code>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/f/${slug}`)}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium flex-shrink-0"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p className="text-sm text-gray-500 mb-4">Publish your form first to get a shareable link.</p>
-                <Button onClick={togglePublish}>Publish Form</Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <ShareTab formId={formId} slug={slug} status={status} onPublish={togglePublish} />
       ) : (
         /* Create Tab - 3-panel layout */
         <div className="flex-1 flex overflow-hidden">

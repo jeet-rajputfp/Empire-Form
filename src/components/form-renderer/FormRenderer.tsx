@@ -10,9 +10,11 @@ interface FormRendererProps {
   description?: string
   fields: FormField[]
   settings: FormSettings
+  sessionToken?: string
 }
 
-export function FormRenderer({ formId, title, description, fields, settings }: FormRendererProps) {
+export function FormRenderer({ formId, title, description, fields, settings, sessionToken }: FormRendererProps) {
+  const storageKey: string = sessionToken ? `session-${sessionToken}` : `form-${formId}-session`
   const [answers, setAnswers] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [responseId, setResponseId] = useState<string | null>(null)
@@ -29,7 +31,7 @@ export function FormRenderer({ formId, title, description, fields, settings }: F
 
   // Restore session
   useEffect(() => {
-    const saved = localStorage.getItem(`form-${formId}-session`)
+    const saved = localStorage.getItem(storageKey)
     if (saved) {
       try {
         const data = JSON.parse(saved)
@@ -42,7 +44,7 @@ export function FormRenderer({ formId, title, description, fields, settings }: F
   // Save session to localStorage
   useEffect(() => {
     if (Object.keys(answers).length > 0) {
-      localStorage.setItem(`form-${formId}-session`, JSON.stringify({ answers, responseId }))
+      localStorage.setItem(storageKey, JSON.stringify({ answers, responseId }))
     }
   }, [answers, responseId, formId])
 
@@ -54,7 +56,7 @@ export function FormRenderer({ formId, title, description, fields, settings }: F
       const res = await fetch('/api/autosave', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ formId, responseId, answers }),
+        body: JSON.stringify({ formId, responseId, answers, sessionToken }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -62,7 +64,7 @@ export function FormRenderer({ formId, title, description, fields, settings }: F
         setLastSavedAt(new Date(data.savedAt))
         setAutoSaveStatus('saved')
         pendingChanges.current = false
-        localStorage.setItem(`form-${formId}-session`, JSON.stringify({ answers, responseId: data.responseId }))
+        localStorage.setItem(storageKey, JSON.stringify({ answers, responseId: data.responseId }))
       } else {
         setAutoSaveStatus('error')
       }
@@ -132,11 +134,11 @@ export function FormRenderer({ formId, title, description, fields, settings }: F
       const res = await fetch(`/api/forms/${formId}/responses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers, responseId }),
+        body: JSON.stringify({ answers, responseId, sessionToken }),
       })
       if (res.ok) {
         setSubmitted(true)
-        localStorage.removeItem(`form-${formId}-session`)
+        localStorage.removeItem(storageKey)
       }
     } catch (err) {
       console.error('Submit error:', err)

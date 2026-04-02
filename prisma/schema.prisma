@@ -67,6 +67,7 @@ model Form {
   workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   responses       FormResponse[]
   versions        FormVersion[]
+  sessions        FormSession[]
 }
 
 model FormVersion {
@@ -99,6 +100,25 @@ model FormResponse {
   form          Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
   respondent    User?     @relation(fields: [respondentId], references: [id])
   fileUploads   FileUpload[]
+  session       FormSession? @relation(fields: [sessionId], references: [id])
+  sessionId     String?
+}
+
+model FormSession {
+  id            String    @id @default(uuid())
+  token         String    @unique
+  formId        String
+  clientName    String
+  clientEmail   String?
+  status        String    @default("not_started") // not_started | in_progress | completed
+  sentAt        DateTime  @default(now())
+  openedAt      DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  form          Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  responses     FormResponse[]
 }
 
 model FileUpload {

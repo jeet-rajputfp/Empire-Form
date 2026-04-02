@@ -27,7 +27,7 @@ export async function GET(req: Request, { params }: { params: { formId: string }
 
 export async function POST(req: Request, { params }: { params: { formId: string } }) {
   const body = await req.json()
-  const { answers, responseId } = body
+  const { answers, responseId, sessionToken } = body
 
   const form = await prisma.form.findUnique({ where: { id: params.formId } })
   if (!form || form.status !== 'published') {
@@ -46,6 +46,17 @@ export async function POST(req: Request, { params }: { params: { formId: string 
         lastSavedAt: new Date(),
       },
     })
+
+    // Mark session as completed if applicable
+    if (sessionToken) {
+      const session = await prisma.formSession.findUnique({ where: { token: sessionToken } })
+      if (session) {
+        await prisma.formSession.update({
+          where: { id: session.id },
+          data: { status: 'completed', completedAt: new Date() },
+        })
+      }
+    }
 
     // Sync to Google Docs if enabled
     const settings = JSON.parse(form.settings)

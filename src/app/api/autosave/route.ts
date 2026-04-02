@@ -3,10 +3,26 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
   try {
-    const { formId, responseId, answers } = await req.json()
+    const { formId, responseId, answers, sessionToken } = await req.json()
 
     if (!formId || !answers) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+    }
+
+    // Resolve session if token provided
+    let sessionId: string | null = null
+    if (sessionToken) {
+      const session = await prisma.formSession.findUnique({ where: { token: sessionToken } })
+      if (session) {
+        sessionId = session.id
+        // Mark session as in_progress
+        if (session.status === 'not_started') {
+          await prisma.formSession.update({
+            where: { id: session.id },
+            data: { status: 'in_progress', openedAt: session.openedAt || new Date() },
+          })
+        }
+      }
     }
 
     // Update existing response or create new one
@@ -27,9 +43,11 @@ export async function POST(req: Request) {
         formId,
         answers: JSON.stringify(answers),
         status: 'in_progress',
+        sessionId,
         metadata: JSON.stringify({
           userAgent: req.headers.get('user-agent') || '',
           startedAt: new Date().toISOString(),
+          sessionToken: sessionToken || null,
         }),
       },
     })

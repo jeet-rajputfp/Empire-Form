@@ -159,7 +159,7 @@ export function QuestionSidebar({
                 {config.icon}
               </span>
               <span className="text-xs text-gray-700 truncate flex-1 font-medium">
-                {idx + 1}
+                {field.label || 'Untitled'}
               </span>
             </button>
           )

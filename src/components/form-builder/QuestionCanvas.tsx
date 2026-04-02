@@ -23,7 +23,6 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
     )
   }
 
-  const questionNum = fieldIndex + 1
   const isLayout = field.type === 'heading' || field.type === 'paragraph'
 
   return (
@@ -68,8 +67,7 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
           ) : (
             /* Regular question */
             <div className="max-w-xl">
-              <div className="flex items-start gap-3 mb-2">
-                <span className="text-lg text-gray-400 pt-1 select-none">{questionNum}.</span>
+              <div className="mb-2">
                 <div className="flex-1">
                   <input
                     type="text"

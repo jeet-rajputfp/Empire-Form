@@ -27,19 +27,19 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
   const isLayout = field.type === 'heading' || field.type === 'paragraph'
 
   return (
-    <div className="flex-1 bg-gray-100 overflow-y-auto">
-      <div className="max-w-2xl mx-auto py-16 px-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[480px] p-12 flex flex-col">
+    <div className="flex-1 bg-gray-100 overflow-y-auto p-6">
+      <div className="max-w-3xl mx-auto h-full min-h-0">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[calc(100vh-8rem)] p-10 flex flex-col">
           {/* Logo - top center inside card */}
           {d.logo && (
-            <div className="flex justify-center mb-8">
-              <img src={d.logo} alt="Logo" className="max-h-12 object-contain" />
+            <div className="flex justify-center pt-4 pb-2">
+              <img src={d.logo} alt="Logo" className="max-h-14 object-contain" />
             </div>
           )}
-          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-center px-4">
           {isLayout ? (
             /* Welcome / Thank You screen */
-            <div className="text-center">
+            <div className="text-center max-w-lg mx-auto">
               <input
                 type="text"
                 value={field.label}
@@ -50,14 +50,24 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
               <textarea
                 value={field.description || ''}
                 onChange={(e) => onUpdate({ ...field, description: e.target.value })}
-                className="mt-4 text-gray-500 text-center w-full border-0 focus:outline-none bg-transparent resize-none placeholder:text-gray-300 text-lg"
+                className="mt-4 text-gray-600 text-center w-full border-0 focus:outline-none bg-transparent resize-none placeholder:text-gray-300 text-base leading-relaxed"
                 placeholder="Description (optional)"
-                rows={2}
+                rows={4}
               />
+              {field.type === 'heading' && (
+                <div className="mt-8">
+                  <button className="bg-purple-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-800 transition-colors">
+                    Let&apos;s get started!
+                  </button>
+                  <p className="mt-3 text-xs text-gray-400">
+                    press <span className="font-medium text-gray-500">Enter</span> ↵
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             /* Regular question */
-            <div>
+            <div className="max-w-xl">
               <div className="flex items-start gap-3 mb-2">
                 <span className="text-lg text-gray-400 pt-1 select-none">{questionNum}.</span>
                 <div className="flex-1">
@@ -68,17 +78,17 @@ export function QuestionCanvas({ field, fieldIndex, totalFields, onUpdate, desig
                     className="text-2xl font-medium text-gray-900 w-full border-0 focus:outline-none bg-transparent placeholder:text-gray-300"
                     placeholder="Question text here. Recall information with @"
                   />
-                  <input
-                    type="text"
+                  <textarea
                     value={field.description || ''}
                     onChange={(e) => onUpdate({ ...field, description: e.target.value })}
-                    className="mt-1 text-gray-400 w-full border-0 focus:outline-none bg-transparent placeholder:text-gray-300 text-base"
+                    className="mt-2 text-gray-500 w-full border-0 focus:outline-none bg-transparent placeholder:text-gray-300 text-sm leading-relaxed resize-none"
                     placeholder="Description (optional)"
+                    rows={3}
                   />
                 </div>
               </div>
 
-              <div className="mt-8 ml-8">
+              <div className="mt-6 ml-8">
                 {renderFieldPreview(field, onUpdate)}
               </div>
             </div>

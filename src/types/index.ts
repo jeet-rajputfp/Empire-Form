@@ -74,6 +74,8 @@ export interface FormSettings {
   autoSaveInterval: number // ms
   theme: 'default' | 'minimal' | 'modern'
   googleDocSync: boolean
+  googleSheetEnabled: boolean
+  googleSheetUrl: string
   design: FormDesign
 }
 
@@ -87,6 +89,8 @@ export const DEFAULT_FORM_SETTINGS: FormSettings = {
   autoSaveInterval: 3000,
   theme: 'default',
   googleDocSync: false,
+  googleSheetEnabled: false,
+  googleSheetUrl: '',
   design: DEFAULT_FORM_DESIGN,
 }
 

@@ -7,6 +7,7 @@ import { QuestionSidebar } from '@/components/form-builder/QuestionSidebar'
 import { QuestionCanvas } from '@/components/form-builder/QuestionCanvas'
 import { QuestionSettings } from '@/components/form-builder/QuestionSettings'
 import { ShareTab } from '@/components/form-builder/ShareTab'
+import { ConnectTab } from '@/components/form-builder/ConnectTab'
 import { Button } from '@/components/ui/button'
 import { Eye, Share2, BarChart3, Link2 } from 'lucide-react'
 import { v4 as uuid } from 'uuid'
@@ -191,7 +192,7 @@ export default function FormEditorPage() {
 
         {/* Center tabs */}
         <div className="flex items-center gap-1">
-          {(['create', 'share', 'results'] as const).map((tab) => (
+          {(['create', 'connect', 'share', 'results'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -232,8 +233,10 @@ export default function FormEditorPage() {
         </div>
       </div>
 
-      {/* Share Tab */}
-      {activeTab === 'share' ? (
+      {/* Connect Tab */}
+      {activeTab === 'connect' ? (
+        <ConnectTab formId={formId} settings={settings} onUpdateSettings={setSettings} onSave={saveForm} />
+      ) : activeTab === 'share' ? (
         <ShareTab formId={formId} slug={slug} status={status} onPublish={togglePublish} />
       ) : (
         /* Create Tab - 3-panel layout */

@@ -68,6 +68,24 @@ export function ConnectTab({ formId, settings, onUpdateSettings, onSave }: Conne
                   <ExternalLink size={12} />
                 </a>
               )}
+              {settings.googleSheetEnabled && (
+                <div className="mt-2">
+                  <button
+                    onClick={async () => {
+                      const res = await fetch(`/api/forms/${formId}/sync-sheet`, { method: 'POST' })
+                      if (res.ok) {
+                        const data = await res.json()
+                        alert(`Ready to sync ${data.totalResponses} responses to Google Sheets.`)
+                      } else {
+                        alert('Sync failed. Check your sheet configuration.')
+                      }
+                    }}
+                    className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                  >
+                    Sync Responses Now
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Toggle + Menu */}

@@ -49,13 +49,15 @@ export async function POST(req: Request, { params }: { params: { formId: string 
     })
 
     if (sessionToken) {
-      const session = await prisma.formSession.findUnique({ where: { token: sessionToken } })
-      if (session) {
-        await prisma.formSession.update({
-          where: { id: session.id },
-          data: { status: 'completed', completedAt: new Date() },
-        })
-      }
+      try {
+        const session = await prisma.formSession.findUnique({ where: { token: sessionToken } })
+        if (session) {
+          await prisma.formSession.update({
+            where: { id: session.id },
+            data: { status: 'completed', completedAt: new Date() },
+          })
+        }
+      } catch {}
     }
   } else {
     response = await prisma.formResponse.create({
@@ -74,7 +76,7 @@ export async function POST(req: Request, { params }: { params: { formId: string 
     })
   }
 
-  // Sync to Google Sheets via webhook if enabled
+  // Auto-sync to Google Sheets
   const settings = JSON.parse(form.settings)
   if (settings.googleSheetEnabled && settings.googleSheetWebhookUrl) {
     try {
@@ -83,26 +85,38 @@ export async function POST(req: Request, { params }: { params: { formId: string 
       )
 
       const row: Record<string, string> = {
-        'Submitted On (UTC)': new Date().toISOString(),
+        'Submitted On (UTC)': new Date().toISOString().replace('T', ' ').slice(0, 19),
       }
 
       fields.forEach((field: any) => {
         if (field.type === 'file') {
           const upload = (response.fileUploads || []).find((f: any) => f.fieldId === field.id)
-          row[field.label] = upload ? upload.path : (answers[field.id]?.path || '')
+          if (upload) {
+            row[field.label] = upload.path
+          } else {
+            const val = answers[field.id]
+            row[field.label] = val && typeof val === 'object' && val.path ? val.path : ''
+          }
         } else {
           const val = answers[field.id]
-          row[field.label] = Array.isArray(val) ? val.join(', ') : String(val || '')
+          if (Array.isArray(val)) {
+            row[field.label] = val.join(', ')
+          } else if (typeof val === 'object' && val) {
+            row[field.label] = val.filename || JSON.stringify(val)
+          } else {
+            row[field.label] = String(val || '')
+          }
         }
       })
 
-      await fetch(settings.googleSheetWebhookUrl, {
+      // POST to Google Apps Script webhook (fire and forget)
+      fetch(settings.googleSheetWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(row),
-      }).catch(console.error)
+      }).catch((err) => console.error('Sheet webhook error:', err))
     } catch (error) {
-      console.error('Google Sheets webhook error:', error)
+      console.error('Google Sheets auto-sync error:', error)
     }
   }
 

@@ -76,6 +76,7 @@ export interface FormSettings {
   googleDocSync: boolean
   googleSheetEnabled: boolean
   googleSheetUrl: string
+  googleSheetWebhookUrl: string
   design: FormDesign
 }
 
@@ -91,6 +92,7 @@ export const DEFAULT_FORM_SETTINGS: FormSettings = {
   googleDocSync: false,
   googleSheetEnabled: false,
   googleSheetUrl: '',
+  googleSheetWebhookUrl: '',
   design: DEFAULT_FORM_DESIGN,
 }
 

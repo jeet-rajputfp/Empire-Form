@@ -85,7 +85,7 @@ export async function POST(req: Request, { params }: { params: { formId: string 
       )
 
       const row: Record<string, string> = {
-        'Submitted On (UTC)': new Date().toISOString().replace('T', ' ').slice(0, 19),
+        'Submitted On (UTC)': formatTimestamp(new Date()),
       }
 
       fields.forEach((field: any) => {
@@ -144,4 +144,14 @@ export async function POST(req: Request, { params }: { params: { formId: string 
     ...response,
     answers: JSON.parse(response.answers),
   })
+}
+
+function formatTimestamp(date: Date): string {
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const month = months[date.getUTCMonth()]
+  const year = date.getUTCFullYear()
+  const hours = String(date.getUTCHours()).padStart(2, '0')
+  const mins = String(date.getUTCMinutes()).padStart(2, '0')
+  return `${day} ${month}, ${year} ${hours}:${mins}`
 }

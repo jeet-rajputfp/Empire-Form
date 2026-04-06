@@ -109,12 +109,32 @@ export async function POST(req: Request, { params }: { params: { formId: string 
         }
       })
 
-      // POST to Google Apps Script webhook (fire and forget)
-      fetch(settings.googleSheetWebhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(row),
-      }).catch((err) => console.error('Sheet webhook error:', err))
+      // POST to Google Apps Script webhook
+      // Apps Script redirects (302), so we need to follow and re-POST
+      // Using text/plain avoids CORS preflight issues
+      const webhookBody = JSON.stringify(row)
+      try {
+        const webhookRes = await fetch(settings.googleSheetWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: webhookBody,
+          redirect: 'follow',
+        })
+        // If we got a redirect that changed to GET, manually POST to the redirect URL
+        if (webhookRes.redirected || webhookRes.status === 302) {
+          const redirectUrl = webhookRes.url || webhookRes.headers.get('location')
+          if (redirectUrl) {
+            await fetch(redirectUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain' },
+              body: webhookBody,
+            })
+          }
+        }
+        console.log('Sheet webhook response:', webhookRes.status)
+      } catch (err) {
+        console.error('Sheet webhook error:', err)
+      }
     } catch (error) {
       console.error('Google Sheets auto-sync error:', error)
     }

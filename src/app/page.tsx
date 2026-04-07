@@ -31,9 +31,6 @@ export default function HomePage() {
             <Link href="/auth/signin">
               <Button variant="ghost">Sign In</Button>
             </Link>
-            <Link href="/auth/signin">
-              <Button>Get Started</Button>
-            </Link>
           </div>
         </div>
       </header>
@@ -47,11 +44,6 @@ export default function HomePage() {
             Create beautiful forms with real-time auto-save, Google Docs integration,
             and powerful analytics. Every response is captured reliably.
           </p>
-          <Link href="/auth/signin">
-            <Button size="lg" className="text-base px-8">
-              Start Building Forms
-            </Button>
-          </Link>
         </section>
 
         <section className="max-w-5xl mx-auto px-6 pb-20">
